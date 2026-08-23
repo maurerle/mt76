@@ -721,8 +721,7 @@ static void mt7996_configure_filter(struct ieee80211_hw *hw,
 }
 
 static int
-mt7996_get_txpower(struct ieee80211_hw *hw, struct ieee80211_vif *vif,
-		   unsigned int link_id, int *dbm)
+mt7996_get_txpower(struct ieee80211_hw *hw, struct ieee80211_vif *vif, int *dbm)
 {
 	struct mt7996_vif *mvif = (struct mt7996_vif *)vif->drv_priv;
 	struct mt7996_phy *phy = mt7996_vif_link_phy(&mvif->deflink);
@@ -1713,26 +1712,31 @@ static void mt7996_link_rate_ctrl_update(void *data,
 	spin_unlock_bh(&dev->mt76.sta_poll_lock);
 }
 
-static void mt7996_link_sta_rc_update(struct ieee80211_hw *hw,
-				      struct ieee80211_vif *vif,
-				      struct ieee80211_link_sta *link_sta,
-				      u32 changed)
+static void mt7996_sta_rc_update(struct ieee80211_hw *hw,
+				 struct ieee80211_vif *vif,
+				 struct ieee80211_sta *sta,
+				 u32 changed)
 {
-	struct ieee80211_sta *sta = link_sta->sta;
 	struct mt7996_sta *msta = (struct mt7996_sta *)sta->drv_priv;
-	struct mt7996_sta_link *msta_link;
+	struct mt7996_dev *dev = mt7996_hw_dev(hw);
+	struct ieee80211_link_sta *link_sta;
+	unsigned int link_id;
 
 	rcu_read_lock();
 
-	msta_link = rcu_dereference(msta->link[link_sta->link_id]);
-	if (msta_link) {
-		struct mt7996_dev *dev = mt7996_hw_dev(hw);
+	for_each_sta_active_link(vif, sta, link_sta, link_id) {
+		struct mt7996_sta_link *msta_link;
+
+		msta_link = rcu_dereference(msta->link[link_sta->link_id]);
+		if (!msta_link)
+			continue;
 
 		mt7996_link_rate_ctrl_update(&changed, msta_link);
-		ieee80211_queue_work(hw, &dev->rc_work);
 	}
 
 	rcu_read_unlock();
+
+	ieee80211_queue_work(hw, &dev->rc_work);
 }
 
 static void mt7996_sta_rate_ctrl_update(void *data, struct ieee80211_sta *sta)
@@ -2282,7 +2286,7 @@ const struct ieee80211_ops mt7996_ops = {
 	.link_info_changed = mt7996_link_info_changed,
 	.sta_state = mt7996_sta_state,
 	.sta_pre_rcu_remove = mt76_sta_pre_rcu_remove,
-	.link_sta_rc_update = mt7996_link_sta_rc_update,
+	.sta_rc_update = mt7996_sta_rc_update,
 	.set_key = mt7996_set_key,
 	.ampdu_action = mt7996_ampdu_action,
 	.set_rts_threshold = mt7996_set_rts_threshold,

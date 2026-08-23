@@ -1756,7 +1756,7 @@ s8 mt76_get_power_bound(struct mt76_phy *phy, s8 txpower)
 EXPORT_SYMBOL_GPL(mt76_get_power_bound);
 
 int mt76_get_txpower(struct ieee80211_hw *hw, struct ieee80211_vif *vif,
-		     unsigned int link_id, int *dbm)
+		     int *dbm)
 {
 	struct mt76_phy *phy = mt76_vif_phy(hw, vif);
 	int n_chains, delta;

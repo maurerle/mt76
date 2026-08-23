@@ -1231,10 +1231,9 @@ static void mt7915_sta_rc_work(void *data, struct ieee80211_sta *sta)
 
 static void mt7915_sta_rc_update(struct ieee80211_hw *hw,
 				 struct ieee80211_vif *vif,
-				 struct ieee80211_link_sta *link_sta,
+				 struct ieee80211_sta *sta,
 				 u32 changed)
 {
-	struct ieee80211_sta *sta = link_sta->sta;
 	struct mt7915_phy *phy = mt7915_hw_phy(hw);
 	struct mt7915_dev *dev = phy->dev;
 	struct mt7915_sta *msta = (struct mt7915_sta *)sta->drv_priv;
@@ -1819,7 +1818,7 @@ const struct ieee80211_ops mt7915_ops = {
 	.stop_ap = mt7915_stop_ap,
 	.sta_state = mt76_sta_state,
 	.sta_pre_rcu_remove = mt76_sta_pre_rcu_remove,
-	.link_sta_rc_update = mt7915_sta_rc_update,
+	.sta_rc_update = mt7915_sta_rc_update,
 	.set_key = mt7915_set_key,
 	.ampdu_action = mt7915_ampdu_action,
 	.set_rts_threshold = mt7915_set_rts_threshold,
@@ -1828,6 +1827,7 @@ const struct ieee80211_ops mt7915_ops = {
 	.sw_scan_complete = mt76_sw_scan_complete,
 	.release_buffered_frames = mt76_release_buffered_frames,
 	.get_txpower = mt76_get_txpower,
+	.set_tim = mt76_set_tim,
 	.set_sar_specs = mt7915_set_sar_specs,
 	.channel_switch_beacon = mt7915_channel_switch_beacon,
 	.get_stats = mt7915_get_stats,
