@@ -1139,7 +1139,21 @@ int mt76_connac2_mac_fill_rx_rate(struct mt76_dev *dev,
 	case IEEE80211_STA_RX_BW_160:
 		status->bw = RATE_INFO_BW_160;
 		break;
+	/* The RXV frame mode field reuses the encoding of the CBW field of
+	 * the channel switch command, which continues past the widths
+	 * covered by enum ieee80211_sta_rx_bandwidth with the narrow,
+	 * half- and quarter-clocked OFDM bandwidths.
+	 */
+	case CMD_CBW_10MHZ:
+		status->bw = RATE_INFO_BW_10;
+		break;
+	case CMD_CBW_5MHZ:
+		status->bw = RATE_INFO_BW_5;
+		break;
 	default:
+		dev_warn_ratelimited(dev->dev,
+				     "rx: unhandled frame mode %u in rate decode\n",
+				     bw);
 		return -EINVAL;
 	}
 

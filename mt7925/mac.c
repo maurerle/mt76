@@ -358,7 +358,16 @@ mt7925_mac_fill_rx_rate(struct mt792x_dev *dev,
 	case IEEE80211_STA_RX_BW_320 + 1:
 		status->bw = RATE_INFO_BW_320;
 		break;
+	case CMD_CBW_10MHZ:
+		status->bw = RATE_INFO_BW_10;
+		break;
+	case CMD_CBW_5MHZ:
+		status->bw = RATE_INFO_BW_5;
+		break;
 	default:
+		dev_warn_ratelimited(dev->mt76.dev,
+				     "rx: unhandled frame mode %u in rate decode\n",
+				     bw);
 		return -EINVAL;
 	}
 
