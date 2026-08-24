@@ -3170,6 +3170,15 @@ int mt7915_mcu_apply_tx_dpd(struct mt7915_phy *phy)
 	if (!(eep[offs] & dpd_mask))
 		return 0;
 
+	/* The pre-calibration data is indexed by the centre frequencies of
+	 * the 20 MHz and wider channels only, so there is no entry to apply
+	 * for the half- and quarter-clocked bandwidths. Keep whatever is
+	 * already programmed instead of failing the channel switch.
+	 */
+	if (chandef->width == NL80211_CHAN_WIDTH_5 ||
+	    chandef->width == NL80211_CHAN_WIDTH_10)
+		return 0;
+
 	idx = mt7915_dpd_freq_idx(dev, center_freq, chandef->width);
 	if (idx < 0)
 		return -EINVAL;
