@@ -557,7 +557,16 @@ static int mt7615_mac_fill_rx(struct mt7615_dev *dev, struct sk_buff *skb)
 		case MT_PHY_BW_160:
 			status->bw = RATE_INFO_BW_160;
 			break;
+		case CMD_CBW_10MHZ:
+			status->bw = RATE_INFO_BW_10;
+			break;
+		case CMD_CBW_5MHZ:
+			status->bw = RATE_INFO_BW_5;
+			break;
 		default:
+			dev_warn_ratelimited(dev->mt76.dev,
+					     "rx: unhandled frame mode %u in rate decode\n",
+					     (u8)FIELD_GET(MT_RXV1_FRAME_MODE, rxdg0));
 			return -EINVAL;
 		}
 
